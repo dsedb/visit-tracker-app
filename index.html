@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+  <html lang="ja">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>訪問地点管理システム</title>
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+      <style>
+          body {
+              margin: 0;
+              font-family: Arial, sans-serif;
+          }
+          #map {
+              height: 100vh;
+              width: 100%;
+          }
+          .control-panel {
+              position: absolute;
+              top: 10px;
+              right: 10px;
+              background: white;
+              padding: 15px;
+              border-radius: 8px;
+              box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+              z-index: 1000;
+              max-width: 300px;
+          }
+          .team-filter {
+              margin-bottom: 15px;
+          }
+          .team-filter select {
+              width: 100%;
+              padding: 8px;
+              border: 1px solid #ddd;
+              border-radius: 4px;
+          }
+          .stats {
+              background: #f8f9fa;
+              padding: 10px;
+              border-radius: 4px;
+              margin-top: 10px;
+          }
+          .visit-form {
+              background: white;
+              padding: 20px;
+              border-radius: 8px;
+              box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+              position: fixed;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              z-index: 10000;
+              display: none;
+              max-width: 400px;
+              width: 90%;
+          }
+          .form-group {
+              margin-bottom: 15px;
+          }
+          .form-group label {
+              display: block;
+              margin-bottom: 5px;
+              font-weight: bold;
+          }
+          .form-group input, .form-group select, .form-group textarea {
+              width: 100%;
+              padding: 8px;
+              border: 1px solid #ddd;
+              border-radius: 4px;
+              box-sizing: border-box;
+          }
+          .btn {
+              background: #007bff;
+              color: white;
+              border: none;
+              padding: 10px 20px;
+              border-radius: 4px;
+              cursor: pointer;
+              margin-right: 10px;
+          }
+          .btn:hover {
+              background: #0056b3;
+          }
+          .btn-secondary {
+              background: #6c757d;
+          }
+          .btn-secondary:hover {
+              background: #545b62;
+          }
+          .overlay {
+              display: none;
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background: rgba(0,0,0,0.5);
+              z-index: 9999;
+          }
+          .marker-visited {
+              filter: hue-rotate(120deg);
+          }
+          .loading {
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              background: white;
+              padding: 20px;
+              border-radius: 8px;
+              z-index: 10001;
+          }
+      </style>
+  </head>
+  <body>
+      <div id="map"></div>
+
+      <div class="control-panel">
+          <h3>訪問地点管理</h3>
+          <div class="team-filter">
+              <label>チーム選択:</label>
+              <select id="teamFilter">
+                  <option value="">すべて</option>
+                  <option value="チームA">チームA</option>
+                  <option value="チームB">チームB</option>
+                  <option value="チームC">チームC</option>
+                  <option value="チームD">チームD</option>
+              </select>
+          </div>
+          <div class="stats">
+              <div>総地点数: <span id="totalPoints">0</span></div>
+              <div>訪問済み: <span id="visitedPoints">0</span></div>
+              <div>未訪問: <span id="unvisitedPoints">0</span></div>
+              <div>進捗率: <span id="progressRate">0%</span></div>
+          </div>
+      </div>
+
+      <div class="overlay" id="overlay"></div>
+      <div class="visit-form" id="visitForm">
+          <h3>訪問記録登録</h3>
+          <form id="visitRecordForm">
+              <input type="hidden" id="visitId" name="visitId">
+              <div class="form-group">
+                  <label>訪問地名称:</label>
+                  <input type="text" id="visitName" readonly>
+              </div>
+              <div class="form-group">
+                  <label>チーム名:</label>
+                  <select id="teamName" name="teamName" required>
+                      <option value="">選択してください</option>
+                      <option value="チームA">チームA</option>
+                      <option value="チームB">チームB</option>
+                      <option value="チームC">チームC</option>
+                      <option value="チームD">チームD</option>
+                  </select>
+              </div>
+              <div class="form-group">
+                  <label>訪問者名:</label>
+                  <input type="text" id="visitor" name="visitor" required>
+              </div>
+              <div class="form-group">
+                  <label>対応者:</label>
+                  <input type="text" id="contact" name="contact">
+              </div>
+              <div class="form-group">
+                  <label>備考:</label>
+                  <textarea id="notes" name="notes" rows="3"></textarea>
+              </div>
+              <div>
+                  <button type="submit" class="btn">登録</button>
+                  <button type="button" class="btn btn-secondary" 
+  onclick="closeVisitForm()">キャンセル</button>
+              </div>
+          </form>
+      </div>
+
+      <div class="loading" id="loading" style="display: none;">
+          <div>データを読み込み中...</div>
+      </div>
+
+      <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+      <script src="app.js"></script>
+  </body>
+  </html>
