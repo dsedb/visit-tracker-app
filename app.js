@@ -136,7 +136,7 @@
              '</div>';
   }
 
-  // 訪問記録を読み込み
+  // 訪問記録を読み込み（コメントアウトを解除して修正）
   function loadVisitRecords() {
       // 全ての訪問地のIDについて記録を取得
       visitData.forEach(function(point) {
@@ -146,17 +146,10 @@
 
   // 指定した訪問地の記録を取得
   function getVisitRecords(visitId) {
-      fetch(CONFIG.GAS_URL, {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-              action: 'getVisitRecords',
-              visitId: visitId,
-              token: CONFIG.AUTH_TOKEN
-          })
-      })
+      const url = CONFIG.GAS_URL + '?action=getVisitRecords&visitId=' + visitId + '&token=' +
+  CONFIG.AUTH_TOKEN;
+
+      fetch(url)
       .then(function(response) {
           return response.json();
       })
@@ -283,7 +276,8 @@
       event.preventDefault();
 
       var formData = new FormData(event.target);
-      var data = {
+
+      const params = new URLSearchParams({
           action: 'addVisitRecord',
           visitId: formData.get('visitId'),
           teamName: formData.get('teamName'),
@@ -291,15 +285,9 @@
           contact: formData.get('contact'),
           notes: formData.get('notes'),
           token: CONFIG.AUTH_TOKEN
-      };
+      });
 
-      fetch(CONFIG.GAS_URL, {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data)
-      })
+      fetch(CONFIG.GAS_URL + '?' + params.toString())
       .then(function(response) {
           return response.json();
       })
@@ -308,7 +296,7 @@
               alert('訪問記録を登録しました。');
               closeVisitForm();
               // 記録を再読み込み
-              getVisitRecords(data.visitId);
+              getVisitRecords(formData.get('visitId'));
           } else {
               alert('エラー: ' + result.error);
           }
