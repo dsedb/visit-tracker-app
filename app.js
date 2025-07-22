@@ -265,15 +265,17 @@
       document.getElementById('visitForm').style.display = 'block';
   }
 
-  // 訪問フォームを閉じる
-  function closeVisitForm() {
-      document.getElementById('overlay').style.display = 'none';
-      document.getElementById('visitForm').style.display = 'none';
-  }
-
   // 訪問記録を送信
   function submitVisitRecord(event) {
       event.preventDefault();
+
+      // 二重送信防止
+      var submitButton = event.target.querySelector('button[type="submit"]');
+      if (submitButton.disabled) {
+          return;
+      }
+      submitButton.disabled = true;
+      submitButton.textContent = '送信中...';
 
       var formData = new FormData(event.target);
 
@@ -304,7 +306,28 @@
       .catch(function(error) {
           console.error('送信エラー:', error);
           alert('送信に失敗しました。');
+      })
+      .finally(function() {
+          // ボタンを元に戻す
+          submitButton.disabled = false;
+          submitButton.textContent = '登録';
       });
+  }
+
+  // 訪問フォームを閉じる
+  function closeVisitForm() {
+      document.getElementById('overlay').style.display = 'none';
+      document.getElementById('visitForm').style.display = 'none';
+
+      // フォームをリセット
+      document.getElementById('visitRecordForm').reset();
+
+      // 送信ボタンも念のためリセット
+      var submitButton = document.querySelector('#visitRecordForm button[type="submit"]');
+      if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.textContent = '登録';
+      }
   }
 
   // ページ読み込み時にマップを初期化
